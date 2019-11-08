@@ -1,6 +1,7 @@
 move_piece(Row, Column, Piece, Current_board, New_board):-
-    check_free_space(Row, Column, Current_board),
+    once(check_free_space(Row, Column, Current_board)),
     %TODO: verificar se pode colocar tendo em conta a linha, coluna ou quadrante
+    valid_move(Row, Column, Piece, Current_board),
     move_to_line(Row, Column, Piece, Current_board, New_board).
 
 move_to_line(1, Column, Piece, [Row | Rest], [New_row | Rest]):-
