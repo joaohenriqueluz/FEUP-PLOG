@@ -28,11 +28,18 @@ next_player(Player, NewPlayer):-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Check Game Over %%
-checkGameOver(Row, Column, Board, _Player):-
-    check_full_row(Row,4,Board)
+checkGameOver(Row, Column, Board, Result):-
+    (check_full_row(Row,4,Board)
     ;
-    check_full_column(4, Column, Board).
-    % TODO: menu com resultados utilizando o Player
+    check_full_column(4, Column, Board)
+    ;
+    check_full_quadrant(Row,Column,Board)
+    ;
+    check_full_board(2,2,Board),
+    Result = 1,
+    write(Result)
+    ).
+
 
 check_repeated_solids(Piece, SolidList):-
     list_empty(SolidList, F),
@@ -83,7 +90,6 @@ check_full_column(Row, Column, Board):-
 check_full_column_in_line(0, _, [], _):- !.
 
 check_full_column_in_line(N, Column, [Row | Rest], SolidList):-
-  
     once(check_full_column_in_column(Column, Row, SolidList, B)),
     once(append_lists(SolidList, B, NewSolidList)),
     %show_records(NewSolidList),
@@ -101,26 +107,67 @@ check_full_column_in_column(N, [_ | Rest], SolidList, [A|B]):-
     %once(show_records([A|B])),
     check_full_column_in_column(Next, Rest, SolidList, [A|B]).
 
+%% Check full quadrant %%
+check_full_quadrant(Row, Column, Board):-
+    (
+    diagonal(Row,Column,DRow,DColumn)
+    ;
+    diagonal(DRow,DColumn,Row,Column)
+    ),
+    once(check_full_quadrant_in_line(Row, Column, Board,_, NewSolidList)),
+    once(check_full_quadrant_in_line(DRow, DColumn, Board, NewSolidList, NewSolidList2)),
+    once(check_full_quadrant_in_line(Row, DColumn, Board, NewSolidList2, NewSolidList3)),
+    check_full_quadrant_in_line(DRow, Column, Board, NewSolidList3, _).
+
+check_full_quadrant_in_line(1, Column, [Row | _], SolidList, NewSolidList):-  
+    once(check_full_quadrant_in_column(Column, Row, SolidList, B)),
+    append_lists(SolidList, B, NewSolidList),
+    !.
+
+check_full_quadrant_in_line(N, Column, [_ | Rest], SolidList, NewSolidList):-
+    %show_records(NewSolidList),
+    N > 1,
+    Next is N - 1,
+    check_full_quadrant_in_line(Next, Column, Rest, SolidList, NewSolidList).
+
+check_full_quadrant_in_column(1, [X |_], SolidList, [X|_]):-
+    check_repeated_solids(X, SolidList), !. 
+    %add para lista
+
+check_full_quadrant_in_column(N, [_ | Rest], SolidList, [A|B]):-
+    once(N > 1),
+    once(Next is N - 1),
+    %once(show_records([A|B])),
+    check_full_quadrant_in_column(Next, Rest, SolidList, [A|B]).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-show_records([]):- write('vazio'),nl.
-show_records([A|B]) :-
-    %cell_symbol(X,A),
-    write('**'),
-  write(A),write('**'),nl,
-  show_records(B). 
+check_full_board(Row, Column, Current_board):-
+    check_full_board_line(Row, Column, Current_board).
 
-list_empty([], true).
-list_empty([_|_], false).
+check_full_board_line(0, _, []):- write('full_borad'), !.
 
+check_full_board_line(N, Column, [Row | Rest]):-
+    once(check_full_board_column(Column, Row)),
+    N > 0,
+    Next is N - 1,
+    check_full_board_line(Next, Column , Rest).
 
-append_lists([],L,L).
-append_lists([X|L1],L2,[X|L3]):- append_lists(L1,L2,L3). 
-
+check_full_board_column(0, []):- !.
+    
+check_full_board_column(N, [X | Rest]):-
+    once(check_whatevers(X)),
+    N > 0,
+    Next is N - 1,
+    check_full_board_column(Next, Rest).
+check_whatevers(X):-
+    (X \== empty
+        ;
+     write('\nNot a full board\n'),
+    fail
+    ).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
 
 gameLoop(Player, Board):-
     repeat,
@@ -130,12 +177,14 @@ gameLoop(Player, Board):-
 
     % Move Piece 
    once(move_piece(Row, Column, Piece, Board, NewBoard)),
-   (checkGameOver(Row, Column, NewBoard, Player),
-       display_game(NewBoard, Player),
-   write('endGame\n')
+   (checkGameOver(Row, Column, NewBoard, Result),
+       ( Result == 1,
+        write('tie\n')
+        ;
+       final_display_game(NewBoard, Player)
+    )
    ;
     next_player(Player, NewPlayer),
     display_game(NewBoard, NewPlayer),
     gameLoop(NewPlayer, NewBoard)
    ).
-    %TODO: Fim de jogo menu (quem ganha, quem perde...)

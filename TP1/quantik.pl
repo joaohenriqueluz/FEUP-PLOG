@@ -4,8 +4,6 @@
 :- use_module(library(random)).
    
 start:-
-    %TODO: menu
-    %human x human
     repeat,
     display_menu,
     read(Option),

@@ -81,13 +81,20 @@ display_board(Board):-
     display_meanings.
 
 display_game(Board, Player):-
-    write('\33\[2J'),
+    %write('\33\[2J'),
     display_board(Board),
     write('Next player: '),
     player(PlayerDisplay, Player),
     write(PlayerDisplay),
     nl, nl, nl.
 
+final_display_game(Board, Player):-
+    write('\33\[2J'),
+    display_board(Board),
+    write('**Winner: Player '),
+    player(PlayerDisplay, Player),
+    write(PlayerDisplay),
+    write('**\n').
 
 display_menu:-
     write('\t       ---------------------------\n'),
