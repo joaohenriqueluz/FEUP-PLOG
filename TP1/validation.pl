@@ -1,3 +1,17 @@
+diagonal(1,1,2,2).
+diagonal(2,1,1,2).
+
+diagonal(1,3,2,4).
+diagonal(2,3,1,4).
+
+diagonal(3,1,4,2).
+diagonal(4,1,3,2).
+
+diagonal(3,3,4,4).
+%diagonal(4,4,3,3).
+
+diagonal(4,3,3,4).
+
 %%%%%% INPUT %%%%%%
 check_column('A', 1).
 check_column('B', 2).
@@ -16,7 +30,7 @@ symb_of_player(cil_b, 2).
 symb_of_player(cone_b, 2).
 symb_of_player(sph_b, 2).
 %symb_of_player(_, _):-
-   % write('That's not a piece of yours! Try again.\n\n'),
+   % write('That\'s not a piece of yours! Try again.\n\n'),
    % fail.
 
 symb_solid(cube_w, cube).
@@ -79,7 +93,9 @@ check_free_space_column(N, [_ | Rest]):-
 %%% Valid Move %%%
 valid_move(Row, Column, Piece, Current_Board):-
     once(valid_line_move(Row, 4, Piece, Current_Board)),
-   once(valid_column_move(4, Column, Piece, Current_Board)).
+   once(valid_column_move(4, Column, Piece, Current_Board)),
+   valid_diagonal_move(Row,Column,Piece,Current_Board).
+
 
 %% Valid Line Move %%
 valid_line_move(Row, Column, Piece, Current_Board):-
@@ -136,5 +152,28 @@ valid_piece_move(Cell, Piece):-
      valid_column_move_to_column(Next, Piece, Rest).
 
 %% Valid Quadrant Move %%
-%valid_quadrant_move(Row, Column, Piece, Current_Board, Player):-
- %  .
+valid_diagonal_move(Row, Column, Piece, Current_board):-
+    (
+        diagonal(Row,Column,DRow,DColumn)
+        ;
+        diagonal(DRow,DColumn,Row,Column)
+    ),
+    valid_diagonal_move_to_line(DRow, DColumn, Piece, Current_board).
+
+valid_diagonal_move_to_line(1, Column, Piece, [Row | _]):-
+    valid_diagonal_move_to_column(Column, Piece, Row).
+
+valid_diagonal_move_to_line(N, Column, Piece, [_ | Rest]):-
+    N > 1,
+    Next is N - 1,
+    valid_diagonal_move_to_line(Next, Column, Piece , Rest).
+
+valid_diagonal_move_to_column(1, Piece, [X | _]):-
+    valid_piece_move(X,Piece).
+
+valid_diagonal_move_to_column(N, Piece, [_ | Rest]):-
+    N > 1,
+    Next is N - 1,
+    valid_diagonal_move_to_column(Next, Piece , Rest).
+
+

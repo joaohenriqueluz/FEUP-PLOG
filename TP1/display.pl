@@ -44,13 +44,15 @@ display_row([Cell | RestRow]):-
     write(' | '),
     display_row(RestRow).
 
-display_rows([]):- !.
+display_rows([],_):- !.
 
-display_rows([Row | OtherRows]):-
-    write('\t | '),
-    display_row(Row), nl,
-    write('\t  ------ ------ ------ ------ \n'),
-    display_rows(OtherRows).
+display_rows([Row | OtherRows],RowNumber):-
+    format('\t|  ~d  | ',RowNumber),
+    NewRowNumber is RowNumber + 1,
+    display_row(Row), 
+    format(' ~d  |',RowNumber), nl,
+    write('\t ----- ------ ------ ------ ------ ------ \n'),
+    display_rows(OtherRows, NewRowNumber).
     
 display_meanings:-
     write('Meanings:\n'),
@@ -67,18 +69,29 @@ display_meanings:-
     write('bSph -> Black sphere\n\n').
 
 display_board(Board):-
-    write('\n\n\n\t  ---------------------------\n'),
-    write('\t  ---------- Board ----------\n'),
-    write('\t  ---------------------------\n\n'),
-    write('\t     A      B      C      D  \n'),
-    write('\t  ------ ------ ------ ------ \n'),
-    display_rows(Board), nl,
+    write('\n\n\n\t       ---------------------------\n'),
+    write('\t       ---------- Board ----------\n'),
+    write('\t       ---------------------------\n\n'),
+    write('\t       ------ ------ ------ ------\n'),
+    write('\t      |  A.  |  B.  |  C.  |  D.  |\n'),
+    write('\t ----- ------ ------ ------ ------ -----\n'),
+    display_rows(Board,1),
+    write('\t      |  A.  |  B.  |  C.  |  D.  |\n'),
+    write('\t       ------ ------ ------ ------\n'),
     display_meanings.
 
 display_game(Board, Player):-
-    %write('\33\[2J'),
+    write('\33\[2J'),
     display_board(Board),
     write('Next player: '),
     player(PlayerDisplay, Player),
     write(PlayerDisplay),
     nl, nl, nl.
+
+
+display_menu:-
+    write('\t       ---------------------------\n'),
+    write('\t      |          QUANTIK          |\n'),
+    write('\t      |        1:New Game         |\n'),
+    write('\t      |        2:Exit Game        |\n'),
+    write('\t       ---------------------------\n').
