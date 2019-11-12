@@ -66,6 +66,11 @@ validate_solid(Piece, Player):-
     write('Invalid Solid! Try again..\n\n'),
     fail).
 
+validate_move(Row, Column, Piece, Player):-
+    once(validate_column(Column)),
+    once(validate_row(Row)),
+    validate_solid(Piece, Player).
+
 %%%%%% MOVEMENT %%%%%%
 %%% Free Space %%%
 check_free_space(Row, Column, Current_board):-

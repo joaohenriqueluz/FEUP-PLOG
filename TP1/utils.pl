@@ -2,7 +2,7 @@ show_records([]):- write('vazio'),nl.
 show_records([A|B]) :-
     %cell_symbol(X,A),
     write('**'),
-  write(A),write('**'),nl,
+  display_game(A, 1),write('**'),nl,
   show_records(B). 
 
 list_empty([], true).

@@ -1,7 +1,12 @@
-move_piece(Row, Column, Piece, Current_board, New_board):-
-    once(check_free_space(Row, Column, Current_board)),
-    valid_move(Row, Column, Piece, Current_board),
-    move_to_line(Row, Column, Piece, Current_board, New_board).
+% [Row, Column, Piece]
+move(Move, Board, NewBoard):-
+    append_lists(_,[Row,Column, Piece|_], Move),
+    move_piece(Row, Column, Piece, Board, NewBoard).
+
+move_piece(Row, Column, Piece, CurrentBoard, NewBoard):-
+    once(check_free_space(Row, Column, CurrentBoard)),
+    valid_move(Row, Column, Piece, CurrentBoard),
+    move_to_line(Row, Column, Piece, CurrentBoard, NewBoard).
 
 move_to_line(1, Column, Piece, [Row | Rest], [New_row | Rest]):-
     move_to_column(Column, Piece, Row, New_row).
@@ -28,17 +33,18 @@ next_player(Player, NewPlayer):-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Check Game Over %%
-checkGameOver(Row, Column, Board, Result):-
+checkGameOver(Row, Column, Board, _Result):-
     (check_full_row(Row,4,Board)
     ;
     check_full_column(4, Column, Board)
     ;
     check_full_quadrant(Row,Column,Board)
-    ;
-    check_full_board(2,2,Board),
-    Result = 1,
-    write(Result)
-    ).
+    
+    %check_full_board(2,2,Board),
+    %Result = 1,
+    %write(Result)
+    )
+    .
 
 
 check_repeated_solids(Piece, SolidList):-
@@ -53,6 +59,7 @@ check_repeated_solids(Piece, SolidList):-
  is_solid_in_list(_, [], 1):- !. % All different solids
  is_solid_in_list(Piece, [X | Y], Value):-
     X == empty  % Empty cell
+    %!, fail
     ;  
     Piece == empty  %Empty piece
     ;
@@ -142,49 +149,115 @@ check_full_quadrant_in_column(N, [_ | Rest], SolidList, [A|B]):-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-check_full_board(Row, Column, Current_board):-
-    check_full_board_line(Row, Column, Current_board).
-
-check_full_board_line(0, _, []):- write('full_borad'), !.
-
-check_full_board_line(N, Column, [Row | Rest]):-
-    once(check_full_board_column(Column, Row)),
-    N > 0,
-    Next is N - 1,
-    check_full_board_line(Next, Column , Rest).
-
-check_full_board_column(0, []):- !.
-    
-check_full_board_column(N, [X | Rest]):-
-    once(check_whatevers(X)),
-    N > 0,
-    Next is N - 1,
-    check_full_board_column(Next, Rest).
-check_whatevers(X):-
-    (X \== empty
-        ;
-     write('\nNot a full board\n'),
-    fail
-    ).
-
+%check_full_board(Row, Column, CurrentBoard):-
+%    check_full_board_line(Row, Column, CurrentBoard).
+%
+%check_full_board_line(0, _, []):- write('full_borad'), !.
+%
+%check_full_board_line(N, Column, [Row | Rest]):-
+%    once(check_full_board_column(Column, Row)),
+%    N > 0,
+%    Next is N - 1,
+%    check_full_board_line(Next, Column , Rest).
+%
+%check_full_board_column(0, []):- !.
+%    
+%check_full_board_column(N, [X | Rest]):-
+%    once(check_whatevers(X)),
+%    N > 0,
+%    Next is N - 1,
+%    check_full_board_column(Next, Rest).
+%check_whatevers(X):-
+%    (X \== empty
+%        ;
+%     write('\nNot a full board\n'),
+%    fail
+%    ).
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-gameLoop(Player, Board):-
+valid_moves(Board, Player, ListOfMoves):-
+    check_valid_moves(4, 4, Board, Player , ListOfMoves).
+
+check_valid_moves(Row, Column, Board, Player , ListOfMoves):-
+    check_valid_moves_line(Row, Column, Board, Player , ListOfMoves).
+
+check_valid_moves_line(0, _, [], _, _):- !.
+
+check_valid_moves_line(N, Column, [Row | Rest], Player , ListOfMoves):-
+    once(check_valid_moves_column(Column, N, Row, Player, ListOfMoves)),
+    N > 0,
+    Next is N - 1,
+    check_valid_moves_line(Next, Column , Rest, Player , ListOfMoves).
+
+check_valid_moves_column(0, _, [], _ , _):- !.
+    
+check_valid_moves_column(N, Nrow, [X | Rest], Player , ListOfMoves):-
+    once(check_whatevers(X,Nrow, N,Player, _,  ListOfMoves, ListOfMoves)),
+    N > 0,
+    Next is N - 1,
+    check_valid_moves_column(Next, Nrow, Rest, Player , ListOfMoves).
+
+check_whatevers(Cell, Row, Column, _Player, _Board, ListOfMoves, NewList):-
+    (Cell \== empty
+    ;
+    %valid_move(Row, Column, Board, Piece),
+    write(Cell),
+    append_lists(ListOfMoves, [Row, Column], NewList)
+    ).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+generator_move(Row, Column, Piece, Player):-
+    member(Row, [1,2,3,4]),
+    member(Column, [1,2,3,4]),
+    symb_of_player(Piece, Player).
+
+mov(Board, Player, NewBoard):-
+    generator_move(Row, Column, Piece, Player),
+    write(Row),
+    write(Column),
+    write(Player),
+    valid_move(Row, Column, Piece, Board),
+    move([Row,Column,Piece], Board, NewBoard).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+gameLoop(Player, Board, h, NextPlayerType):-
     repeat,
-    once(validate_column(Column)),
-    once(validate_row(Row)),
-    once(validate_solid(Piece, Player)),
+    once(validate_move(Row, Column, Piece, Player)),
 
     % Move Piece 
-   once(move_piece(Row, Column, Piece, Board, NewBoard)),
-   (checkGameOver(Row, Column, NewBoard, Result),
-       ( Result == 1,
-        write('tie\n')
-        ;
+    once(move([Row,Column,Piece], Board, NewBoard)),
+   (checkGameOver(Row, Column, NewBoard, _),
+   %TODO: findALl , se empty acaba
        final_display_game(NewBoard, Player)
-    )
    ;
+
     next_player(Player, NewPlayer),
     display_game(NewBoard, NewPlayer),
-    gameLoop(NewPlayer, NewBoard)
+    gameLoop(NewPlayer, NewBoard,  NextPlayerType, h)
    ).
+
+gameLoop(Player, Board, c, NextPlayerType):-
+    repeat,
+
+    % Move Piece 
+    findall(Board, mov(Board, Player, _), AllBoards),
+    choose_one_board(AllBoards, FinalBoard),
+   %(checkGameOver(Row, Column, NewBoard, _),
+    %   final_display_game(NewBoard, Player)
+   %;
+   
+    next_player(Player, NewPlayer),
+    display_game(FinalBoard, NewPlayer),
+    gameLoop(NewPlayer, FinalBoard, NextPlayerType, c)
+   .
+
+choose_one_board(AllBoards, FinalBoard) :- 
+    random_select(FinalBoard, AllBoards, _),
+    display_game(FinalBoard, 1).
+

@@ -99,6 +99,8 @@ final_display_game(Board, Player):-
 display_menu:-
     write('\t       ---------------------------\n'),
     write('\t      |          QUANTIK          |\n'),
-    write('\t      |        1:New Game         |\n'),
-    write('\t      |        2:Exit Game        |\n'),
+    write('\t      |      1:Human vs Human     |\n'),
+    write('\t      |    2:Human vs Computer    |\n'),
+    write('\t      |   3:Computer vs Computer  |\n'),
+    write('\t      |        4:Exit Game        |\n'),
     write('\t       ---------------------------\n').
