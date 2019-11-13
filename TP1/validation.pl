@@ -123,7 +123,7 @@ pieces_number(Row, Column, Piece, Board):-
     %write('22  \n'),
     pieces_number_in_line(Row, Column, Piece, Board, 0, _).
 
-pieces_number_in_line(0, _, _, [], _, _):- write('nao tem menos de 2\n'), !.
+pieces_number_in_line(0, _, _, [], _, _):- !.
 
 pieces_number_in_line(N, Column, Piece, [Row | Rest], Counter, NewCounter):-
     %write('33  \n'),
@@ -137,13 +137,14 @@ pieces_number_in_column(_, _, [], 2, _):- write('Ja tem dois\n'),
 
 pieces_number_in_column(0, _, [], NewCounter, NewnewCounter):-  
     NewnewCounter is NewCounter, 
-    write('\n\nblablablabl\n\n'),
-    write(NewnewCounter),!.
+   % write('\n\nblablablabl\n\n'),
+    %write(NewnewCounter),
+    !.
 
 pieces_number_in_column(N, Piece, [X | Rest], Counter, NewnewCounter):-
     %write('44  \n'),
     once(same_piece(X, Piece, Counter, NewCounter)),
-    write(NewCounter),
+    %write(NewCounter),
     N > 0,
     Next is N - 1,
     pieces_number_in_column(Next, Piece, Rest, NewCounter, NewnewCounter).

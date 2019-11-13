@@ -28,7 +28,13 @@ switch_player(1, 2).
 switch_player(2, 1).
 
 next_player(Player, NewPlayer):-
-    switch_player(Player, NewPlayer).
+write('\n*** Player *** \n\n'),
+        write(Player),
+write('\n*** NEwPlayer *** \n\n'),
+        write(NewPlayer),
+    switch_player(Player, NewPlayer),
+         write('\n*** NEwPlayer *** \n\n'),
+        write(NewPlayer).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -175,16 +181,17 @@ game_loop(Player, Board, h, NextPlayerType):-
     (game_over(NewBoard, Player),
     final_display_game(NewBoard, Player)
     ;
-        (
         next_player(Player, NewPlayer),
+        (
         valid_moves(NewBoard, NewPlayer, AllBoards),
 
         % No more valid moves
-        (list_empty(AllBoards)),
+        list_empty(AllBoards),
         write('tie\n')      
         ;
 
         % Next player turn
+        write('\n*** Player *** \n\n'),
         write(NewPlayer),
         display_game(NewBoard, NewPlayer),
         game_loop(NewPlayer, NewBoard,  NextPlayerType, h)
@@ -202,8 +209,8 @@ game_loop(Player, Board, c, NextPlayerType):-
     (game_over(FinalBoard, Player),
     final_display_game(FinalBoard, Player)
     ;
+    next_player(Player, NewPlayer),
         (
-        next_player(Player, NewPlayer),
         valid_moves(FinalBoard, NewPlayer, AllBoards),
 
         % No more valid moves
@@ -213,7 +220,7 @@ game_loop(Player, Board, c, NextPlayerType):-
 
         % Next player turn
         display_game(FinalBoard, NewPlayer),
-        sleep(1.5),
+        sleep(0.5),
         game_loop(NewPlayer, FinalBoard,  NextPlayerType, c)
         )
     ).
