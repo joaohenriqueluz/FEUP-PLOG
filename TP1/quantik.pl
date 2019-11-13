@@ -3,6 +3,7 @@
 :- consult('validation.pl').
 :- consult('utils.pl').
 :- use_module(library(random)).
+:- use_module(library(system)).
    
 play:-
     repeat,
@@ -18,19 +19,21 @@ play:-
         initial_board(Board),
         random_select(Player, [1, 2], _),
         display_game(Board, Player),
-        gameLoop(Player, Board, h, h).
+        game_loop(Player, Board, h, h).
 
     option_chosen(2):- 
         initial_board(Board),
         random_select(Player, [1, 2], _),
         display_game(Board, Player),
-        gameLoop(Player, Board, h, c).
+        game_loop(Player, Board, h, c).
 
     option_chosen(3):- 
         initial_board(Board),
         random_select(Player, [1, 2], _),
         display_game(Board, Player),
-        gameLoop(Player, Board, c, c).
+        game_loop(Player, Board, c, c).
     
     option_chosen(4):-
         write('Exiting game...\n').
+
+    %TODO: nivel de dificuldade

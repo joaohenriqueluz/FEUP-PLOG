@@ -8,15 +8,15 @@ initial_board([
 mid_board([
     [empty, cube_w, empty,  cil_b],
     [cil_w, sph_b,  empty,  empty],
-    [empty, cone_b, cone_b, sph_w],
-    [empty, empty,  cil_w,  empty]
+    [empty, cone_b, cone_b_2, sph_w],
+    [empty, empty,  cil_w_2,  empty]
 ]).
 
 final_board([
     [empty, cube_w, empty,  cil_b],
     [cil_w, sph_b,  empty,  empty],
-    [empty, cone_b, cone_b, sph_w],
-    [empty, empty,  cil_w,  cube_w]
+    [empty, cone_b, cone_b_2, sph_w],
+    [empty, empty,  cil_w_2,  cube_w_2]
 ]).
 
 cell_symbol(empty,'    ').
@@ -28,6 +28,14 @@ cell_symbol(cube_b, bCub).
 cell_symbol(cil_b, bCyl).
 cell_symbol(cone_b, bCon).
 cell_symbol(sph_b, bSph).
+%cell_symbol(cube_w_2, wCub).
+%cell_symbol(cil_w_2, wCyl).
+%cell_symbol(cone_w_2, wCon).
+%cell_symbol(sph_w_2, wSph).
+%cell_symbol(cube_b_2, bCub).
+%cell_symbol(cil_b_2, bCyl).
+%cell_symbol(cone_b_2, bCon).
+%cell_symbol(sph_b_2, bSph).
 cell_symbol(_, _):- fail.
 
 write_symbol(Cell):-

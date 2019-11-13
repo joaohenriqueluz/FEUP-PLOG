@@ -8,8 +8,6 @@ diagonal(3,1,4,2).
 diagonal(4,1,3,2).
 
 diagonal(3,3,4,4).
-%diagonal(4,4,3,3).
-
 diagonal(4,3,3,4).
 
 %%%%%% INPUT %%%%%%
@@ -17,9 +15,6 @@ check_column('A', 1).
 check_column('B', 2).
 check_column('C', 3).
 check_column('D', 4).
-%check_column(_, _):- 
-%    write('Invalid Column! Try again..\n\n'),
-%    fail.
 
 symb_of_player(cube_w, 1).
 symb_of_player(cil_w, 1).
@@ -29,9 +24,20 @@ symb_of_player(cube_b, 2).
 symb_of_player(cil_b, 2).
 symb_of_player(cone_b, 2).
 symb_of_player(sph_b, 2).
-%symb_of_player(_, _):-
-   % write('That\'s not a piece of yours! Try again.\n\n'),
-   % fail.
+
+%symb_of_player(cube_w_2, 1).
+%symb_of_player(cil_w_2, 1).
+%symb_of_player(cone_w_2, 1).
+%symb_of_player(sph_w_2, 1).
+%symb_of_player(cube_b_2, 2).
+%symb_of_player(cil_b_2, 2).
+%symb_of_player(cone_b_2, 2).
+%symb_of_player(sph_b_2, 2).
+
+%symbb(w, 1).
+%symbb(b,2).
+%symb_of_player([A|_], Player):-
+%    symbb(A, Player),
 
 symb_solid(cube_w, cube).
 symb_solid(cil_w, cylinder).
@@ -41,6 +47,15 @@ symb_solid(cube_b, cube).
 symb_solid(cil_b, cylinder).
 symb_solid(cone_b, cone).
 symb_solid(sph_b, sphere).
+
+%symb_solid(cube_w_2, cube).
+%symb_solid(cil_w_2, cylinder).
+%symb_solid(cone_w_2, cone).
+%symb_solid(sph_w_2, sphere).
+%symb_solid(cube_b_2, cube).
+%symb_solid(cil_b_2, cylinder).
+%symb_solid(cone_b_2, cone).
+%symb_solid(sph_b_2, sphere).
 
 validate_column(ColumnNumb):-
     write('Column: '),
@@ -58,18 +73,22 @@ validate_row(Row):-
     write('Invalid Row! Try again..\n\n'),
     fail).
 
-validate_solid(Piece, Player):-
+get_solid(Solid):-
     write('Solid: '),
-    read(Solid),
+    read(Solid).
+
+validate_solid(Solid, Piece, Player):-
     (\+ (var(Solid)), cell_symbol(Piece, Solid), symb_of_player(Piece, Player)
     ;
     write('Invalid Solid! Try again..\n\n'),
-    fail).
+    fail
+    ).
 
 validate_move(Row, Column, Piece, Player):-
     once(validate_column(Column)),
     once(validate_row(Row)),
-    validate_solid(Piece, Player).
+    get_solid(Solid),
+    validate_solid(Solid, Piece, Player).
 
 %%%%%% MOVEMENT %%%%%%
 %%% Free Space %%%
@@ -84,22 +103,65 @@ check_free_space_line(N, Column, [_ | Rest]):-
     Next is N - 1,
     check_free_space_line(Next, Column , Rest).
 
-check_free_space_column(1, [X | _]):-
-    (X == empty
-    ;
-    write('\nThat cell already has a piece! Choose another one:\n'),
-    fail).
+check_free_space_column(1, [empty | _]):- !.
+
+check_free_space_column(1, [_ | _]):-
+   % TODO:write('\nThat cell already has a piece! Choose another one:\n'),
+    fail.
 
 check_free_space_column(N, [_ | Rest]):-
     N > 1,
     Next is N - 1,
     check_free_space_column(Next, Rest).
 
+%%% Pieces Number %%%
+check_pieces_number(Piece, Board):-
+   % write('11  \n'),
+    pieces_number(4, 4, Piece, Board).
+
+pieces_number(Row, Column, Piece, Board):-
+    %write('22  \n'),
+    pieces_number_in_line(Row, Column, Piece, Board, 0, _).
+
+pieces_number_in_line(0, _, _, [], _, _):- write('nao tem menos de 2\n'), !.
+
+pieces_number_in_line(N, Column, Piece, [Row | Rest], Counter, NewCounter):-
+    %write('33  \n'),
+    once(pieces_number_in_column(Column, Piece, Row, Counter, NewCounter)),
+    N > 0,
+    Next is N - 1,
+    pieces_number_in_line(Next, Column, Piece, Rest, NewCounter, _).
+
+pieces_number_in_column(_, _, [], 2, _):- write('Ja tem dois\n'),
+    !,fail.
+
+pieces_number_in_column(0, _, [], NewCounter, NewnewCounter):-  
+    NewnewCounter is NewCounter, 
+    write('\n\nblablablabl\n\n'),
+    write(NewnewCounter),!.
+
+pieces_number_in_column(N, Piece, [X | Rest], Counter, NewnewCounter):-
+    %write('44  \n'),
+    once(same_piece(X, Piece, Counter, NewCounter)),
+    write(NewCounter),
+    N > 0,
+    Next is N - 1,
+    pieces_number_in_column(Next, Piece, Rest, NewCounter, NewnewCounter).
+
+same_piece(X, X, Counter, NewCounter):-
+    %write('samePiece  \n'),
+    NewCounter is Counter + 1.
+
+same_piece(_, _, Counter, Counter):-
+   % write('not same piece\n'),
+    !.
+
+
 %%% Valid Move %%%
 valid_move(Row, Column, Piece, Current_Board):-
     once(valid_line_move(Row, 4, Piece, Current_Board)),
-   once(valid_column_move(4, Column, Piece, Current_Board)),
-   valid_diagonal_move(Row,Column,Piece,Current_Board).
+    once(valid_column_move(4, Column, Piece, Current_Board)),
+    valid_diagonal_move(Row,Column,Piece,Current_Board).
 
 
 %% Valid Line Move %%
@@ -122,19 +184,18 @@ valid_line_move_to_column(N, Piece, [X | Rest]):-
     Next is N - 1,
     valid_line_move_to_column(Next, Piece, Rest).
 
+valid_piece_move(empty, _):-!.
+
 valid_piece_move(Cell, Piece):-
-    (Cell == empty
+    symb_solid(Cell, CellSolid),
+    symb_solid(Piece, PieceSolid),
+    symb_of_player(Cell, CellPlayer),
+    symb_of_player(Piece, PiecePlayer),
+    \+ (CellSolid == PieceSolid,
+    CellPlayer \== PiecePlayer)
     ;
-        (symb_solid(Cell, CellSolid),
-        symb_solid(Piece, PieceSolid),
-        symb_of_player(Cell, CellPlayer),
-        symb_of_player(Piece, PiecePlayer),
-        \+ (CellSolid == PieceSolid,
-        CellPlayer \== PiecePlayer))
-    ;
-    write('\nYou\'re opponent has already put the same solid in that line, column or quadrant! Choose another cell:\n'),
-    fail
-        ).
+    %TODO: write('\nYou\'re opponent has already put the same solid in that line, column or quadrant! Choose another cell:\n'),
+    fail.
 
 %% Valid Column Move %%
  valid_column_move(Row, Column, Piece, Current_Board):-
