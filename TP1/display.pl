@@ -28,14 +28,6 @@ cell_symbol(cube_b, bCub).
 cell_symbol(cil_b, bCyl).
 cell_symbol(cone_b, bCon).
 cell_symbol(sph_b, bSph).
-%cell_symbol(cube_w_2, wCub).
-%cell_symbol(cil_w_2, wCyl).
-%cell_symbol(cone_w_2, wCon).
-%cell_symbol(sph_w_2, wSph).
-%cell_symbol(cube_b_2, bCub).
-%cell_symbol(cil_b_2, bCyl).
-%cell_symbol(cone_b_2, bCon).
-%cell_symbol(sph_b_2, bSph).
 cell_symbol(_, _):- fail.
 
 write_symbol(Cell):-
@@ -89,20 +81,25 @@ display_board(Board):-
     display_meanings.
 
 display_game(Board, Player):-
-    %write('\33\[2J'),
+   % write('\33\[2J'),
     display_board(Board),
     write('Next player: '),
     player(PlayerDisplay, Player),
     write(PlayerDisplay),
     nl, nl, nl.
 
-final_display_game(Board, Player):-
-    write('\33\[2J'),
+display_game_over(Board, Player):-
+    %write('\33\[2J'),
     display_board(Board),
-    write('**Winner: Player '),
+    write('\n ** Winner: Player '),
     player(PlayerDisplay, Player),
     write(PlayerDisplay),
-    write('**\n').
+    write(' **\n\n').
+
+display_tie(Board):-
+    write('\33\[2J'),
+    display_board(Board),
+    write('\n ** No more valid moves available **\n\n').
 
 display_menu:-
     write('\t       ---------------------------\n'),
@@ -111,4 +108,11 @@ display_menu:-
     write('\t      |    2:Human vs Computer    |\n'),
     write('\t      |   3:Computer vs Computer  |\n'),
     write('\t      |        4:Exit Game        |\n'),
+    write('\t       ---------------------------\n').
+
+display_level:-
+    write('\t       ---------------------------\n'),
+    write('\t      |          QUANTIK          |\n'),
+    write('\t      |          1:Easy           |\n'),
+    write('\t      |         2:Medium          |\n'),
     write('\t       ---------------------------\n').

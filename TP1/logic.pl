@@ -1,4 +1,3 @@
-% [Row, Column, Piece]
 move(Move, Board, NewBoard):-
     append_lists(_,[Row,Column, Piece|_], Move),
     move_piece(Row, Column, Piece, Board, NewBoard).
@@ -28,20 +27,15 @@ switch_player(1, 2).
 switch_player(2, 1).
 
 next_player(Player, NewPlayer):-
-write('\n*** Player *** \n\n'),
-        write(Player),
-write('\n*** NEwPlayer *** \n\n'),
-        write(NewPlayer),
-    switch_player(Player, NewPlayer),
-         write('\n*** NEwPlayer *** \n\n'),
-        write(NewPlayer).
+    switch_player(Player, NewPlayer).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Check Game Over %%
-game_over(Board, _Player):-
-    check_game_over(Board).
+game_over(Board, Player):-
+    check_game_over(Board),
+    display_game_over(Board, Player).
 
 check_game_over(Board):-
     check_full_row(4,4,Board)
@@ -168,7 +162,7 @@ random_move(Board, Player, NewBoard):-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Game loop for human player
-game_loop(Player, Board, h, NextPlayerType):-
+game_loop(Player, Board, h, NextPlayerType, Level):-
     repeat,
 
     % Ask and validate move
@@ -179,7 +173,7 @@ game_loop(Player, Board, h, NextPlayerType):-
 
     % Check Game Over
     (game_over(NewBoard, Player),
-    final_display_game(NewBoard, Player)
+    display_game_over(NewBoard, Player)
     ;
         next_player(Player, NewPlayer),
         (
@@ -187,47 +181,80 @@ game_loop(Player, Board, h, NextPlayerType):-
 
         % No more valid moves
         list_empty(AllBoards),
-        write('tie\n')      
+        display_tie(NewBoard)   
         ;
 
         % Next player turn
-        write('\n*** Player *** \n\n'),
-        write(NewPlayer),
         display_game(NewBoard, NewPlayer),
-        game_loop(NewPlayer, NewBoard,  NextPlayerType, h)
+        game_loop(NewPlayer, NewBoard,  NextPlayerType, h, Level)
         )
     ).
 
 % Game loop for computer player
-game_loop(Player, Board, c, NextPlayerType):-
+game_loop(Player, Board, c, NextPlayerType, Level):-
     repeat,
 
     % Move Piece 
     valid_moves(Board, Player, PossibleBoards),
-    choose_one_board(PossibleBoards, FinalBoard),
-   
-    (game_over(FinalBoard, Player),
-    final_display_game(FinalBoard, Player)
+    quantify_moves(PossibleBoards, WinningBoards),
+    choose_one_board(Level, PossibleBoards, WinningBoards, FinalBoard),   
+    (game_over(FinalBoard, Player)
     ;
     next_player(Player, NewPlayer),
         (
+        % Checks for next turn valid moves
         valid_moves(FinalBoard, NewPlayer, AllBoards),
 
         % No more valid moves
         (list_empty(AllBoards)),
-        write('tie\n')      
+        display_tie(FinalBoard)      
         ;
 
         % Next player turn
         display_game(FinalBoard, NewPlayer),
         sleep(0.5),
-        game_loop(NewPlayer, FinalBoard,  NextPlayerType, c)
+        game_loop(NewPlayer, FinalBoard,  NextPlayerType, c, Level)
         )
     ).
 
-choose_one_board(AllBoards, FinalBoard) :- 
+quantify_moves(AllBoards, WinningBoards) :-
+    quantify(AllBoards, _, WinningBoards).
+
+quantify([],NewWinningBoards,NewWinningBoards):- !.
+
+quantify([Board| Rest], WinningBoards, NewNewWinningBoards):-
+    once(value(Board, Value)),
+    once(add_board_by_value(Board, Value, WinningBoards, NewWinningBoards)),
+    quantify(Rest, NewWinningBoards, NewNewWinningBoards)
+    .
+
+value(Board, Value):-
+    check_game_over(Board),
+    good_move(_, Value)
+    ;
+    bad_move(_, Value).
+
+good_move(_, 1).
+bad_move(_, 0).
+
+add_board_by_value(_, 0, WinningBoards, NewWinningBoards):- 
+    append_lists(WinningBoards, [], NewWinningBoards).
+
+add_board_by_value(Board, 1, WinningBoards, NewWinningBoards):- 
+    append_lists(WinningBoards, [Board], NewWinningBoards).
+
+choose_move(AllBoards, FinalBoard) :- 
     random_select(FinalBoard, AllBoards, _).
 
 valid_moves(Board, Player, AllBoards):-
     findall(NewBoard, random_move(Board, Player, NewBoard), AllBoards).
+
+choose_one_board(1, PossibleBoards, _, FinalBoard):-
+    choose_move(PossibleBoards, FinalBoard).
+
+choose_one_board(2, PossibleBoards, WinningBoards, FinalBoard):-
+    list_empty(WinningBoards),
+    choose_move(PossibleBoards, FinalBoard)
+    ;
+    choose_move(WinningBoards, FinalBoard).
 

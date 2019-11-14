@@ -25,20 +25,6 @@ symb_of_player(cil_b, 2).
 symb_of_player(cone_b, 2).
 symb_of_player(sph_b, 2).
 
-%symb_of_player(cube_w_2, 1).
-%symb_of_player(cil_w_2, 1).
-%symb_of_player(cone_w_2, 1).
-%symb_of_player(sph_w_2, 1).
-%symb_of_player(cube_b_2, 2).
-%symb_of_player(cil_b_2, 2).
-%symb_of_player(cone_b_2, 2).
-%symb_of_player(sph_b_2, 2).
-
-%symbb(w, 1).
-%symbb(b,2).
-%symb_of_player([A|_], Player):-
-%    symbb(A, Player),
-
 symb_solid(cube_w, cube).
 symb_solid(cil_w, cylinder).
 symb_solid(cone_w, cone).
@@ -47,15 +33,6 @@ symb_solid(cube_b, cube).
 symb_solid(cil_b, cylinder).
 symb_solid(cone_b, cone).
 symb_solid(sph_b, sphere).
-
-%symb_solid(cube_w_2, cube).
-%symb_solid(cil_w_2, cylinder).
-%symb_solid(cone_w_2, cone).
-%symb_solid(sph_w_2, sphere).
-%symb_solid(cube_b_2, cube).
-%symb_solid(cil_b_2, cylinder).
-%symb_solid(cone_b_2, cone).
-%symb_solid(sph_b_2, sphere).
 
 validate_column(ColumnNumb):-
     write('Column: '),
@@ -116,46 +93,34 @@ check_free_space_column(N, [_ | Rest]):-
 
 %%% Pieces Number %%%
 check_pieces_number(Piece, Board):-
-   % write('11  \n'),
     pieces_number(4, 4, Piece, Board).
 
 pieces_number(Row, Column, Piece, Board):-
-    %write('22  \n'),
     pieces_number_in_line(Row, Column, Piece, Board, 0, _).
 
 pieces_number_in_line(0, _, _, [], _, _):- !.
 
 pieces_number_in_line(N, Column, Piece, [Row | Rest], Counter, NewCounter):-
-    %write('33  \n'),
     once(pieces_number_in_column(Column, Piece, Row, Counter, NewCounter)),
     N > 0,
     Next is N - 1,
     pieces_number_in_line(Next, Column, Piece, Rest, NewCounter, _).
 
-pieces_number_in_column(_, _, [], 2, _):- write('Ja tem dois\n'),
-    !,fail.
+pieces_number_in_column(_, _, [], 2, _):- !, fail.
 
 pieces_number_in_column(0, _, [], NewCounter, NewnewCounter):-  
-    NewnewCounter is NewCounter, 
-   % write('\n\nblablablabl\n\n'),
-    %write(NewnewCounter),
-    !.
+    NewnewCounter is NewCounter, !.
 
 pieces_number_in_column(N, Piece, [X | Rest], Counter, NewnewCounter):-
-    %write('44  \n'),
     once(same_piece(X, Piece, Counter, NewCounter)),
-    %write(NewCounter),
     N > 0,
     Next is N - 1,
     pieces_number_in_column(Next, Piece, Rest, NewCounter, NewnewCounter).
 
 same_piece(X, X, Counter, NewCounter):-
-    %write('samePiece  \n'),
     NewCounter is Counter + 1.
 
-same_piece(_, _, Counter, Counter):-
-   % write('not same piece\n'),
-    !.
+same_piece(_, _, Counter, Counter):- !.
 
 
 %%% Valid Move %%%
