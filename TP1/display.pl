@@ -116,3 +116,17 @@ display_level:-
     write('\t      |          1:Easy           |\n'),
     write('\t      |         2:Medium          |\n'),
     write('\t       ---------------------------\n').
+
+display_move_error:-
+    write('\n\t ---------------------------------------\n'),
+    write('\t|         Something went wrong!         |\n'),
+    write('\t|                 Hint:                 |\n'),
+    write('\t|     *That cell has already a piece    |\n'),
+    write('\t|     *Your opponent has already put    |\n'),
+    write('\t|       the same solid in that line,    |\n'),
+    write('\t|            column or quadrant         |\n'),
+    write('\t|     *You have already put the two     |\n'),
+    write('\t|   pieces of that shape in the board   |\n'),
+    write('\t|                                       |\n'),
+    write('\t|        **Choose another move**        |\n'),
+    write('\t ---------------------------------------\n\n').

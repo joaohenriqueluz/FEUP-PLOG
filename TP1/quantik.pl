@@ -1,7 +1,8 @@
 :- consult('display.pl').
 :- consult('logic.pl').
 :- consult('validation.pl').
-:- consult('utils.pl').
+:- consult('rules.pl').
+:- consult('computer_play.pl').
 :- use_module(library(random)).
 :- use_module(library(system)).
    

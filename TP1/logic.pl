@@ -5,7 +5,7 @@ move(Move, Board, NewBoard):-
 move_piece(Row, Column, Piece, CurrentBoard, NewBoard):-
     once(check_free_space(Row, Column, CurrentBoard)),
     once(check_pieces_number(Piece, CurrentBoard)),
-    valid_move(Row, Column, Piece, CurrentBoard),
+    is_move_valid(Row, Column, Piece, CurrentBoard),
     move_to_line(Row, Column, Piece, CurrentBoard, NewBoard).
 
 move_to_line(1, Column, Piece, [Row | Rest], [New_row | Rest]):-
@@ -148,34 +148,24 @@ solid_isnt_in_list(Piece, [X | Y]):-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-generator_move(Row, Column, Piece, Player):-
-    member(Row, [1,2,3,4]),
-    member(Column, [1,2,3,4]),
-    symb_of_player(Piece, Player).
-
-random_move(Board, Player, NewBoard):-
-    generator_move(Row, Column, Piece, Player),
-    valid_move(Row, Column, Piece, Board),
-    move([Row,Column,Piece], Board, NewBoard).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 % Game loop for human player
 game_loop(Player, Board, h, NextPlayerType, Level):-
     repeat,
 
     % Ask and validate move
-    once(validate_move(Row, Column, Piece, Player)),
+    once(validate_move_input(Row, Column, Piece, Player)),
 
     % Move Piece 
-    once(move([Row,Column,Piece], Board, NewBoard)),
+    (once(move([Row,Column,Piece], Board, NewBoard))
+    ;
+    display_move_error,
+    fail),
 
     % Check Game Over
     (game_over(NewBoard, Player),
     display_game_over(NewBoard, Player)
     ;
-        next_player(Player, NewPlayer),
+    next_player(Player, NewPlayer),
         (
         valid_moves(NewBoard, NewPlayer, AllBoards),
 
@@ -195,10 +185,10 @@ game_loop(Player, Board, c, NextPlayerType, Level):-
     repeat,
 
     % Move Piece 
-    valid_moves(Board, Player, PossibleBoards),
-    quantify_moves(PossibleBoards, WinningBoards),
-    choose_one_board(Level, PossibleBoards, WinningBoards, FinalBoard),   
-    (game_over(FinalBoard, Player)
+    once(computer_move(Board, Player, Level, FinalBoard)),
+   
+    (
+    game_over(FinalBoard, Player)
     ;
     next_player(Player, NewPlayer),
         (
@@ -217,44 +207,4 @@ game_loop(Player, Board, c, NextPlayerType, Level):-
         )
     ).
 
-quantify_moves(AllBoards, WinningBoards) :-
-    quantify(AllBoards, _, WinningBoards).
-
-quantify([],NewWinningBoards,NewWinningBoards):- !.
-
-quantify([Board| Rest], WinningBoards, NewNewWinningBoards):-
-    once(value(Board, Value)),
-    once(add_board_by_value(Board, Value, WinningBoards, NewWinningBoards)),
-    quantify(Rest, NewWinningBoards, NewNewWinningBoards)
-    .
-
-value(Board, Value):-
-    check_game_over(Board),
-    good_move(_, Value)
-    ;
-    bad_move(_, Value).
-
-good_move(_, 1).
-bad_move(_, 0).
-
-add_board_by_value(_, 0, WinningBoards, NewWinningBoards):- 
-    append_lists(WinningBoards, [], NewWinningBoards).
-
-add_board_by_value(Board, 1, WinningBoards, NewWinningBoards):- 
-    append_lists(WinningBoards, [Board], NewWinningBoards).
-
-choose_move(AllBoards, FinalBoard) :- 
-    random_select(FinalBoard, AllBoards, _).
-
-valid_moves(Board, Player, AllBoards):-
-    findall(NewBoard, random_move(Board, Player, NewBoard), AllBoards).
-
-choose_one_board(1, PossibleBoards, _, FinalBoard):-
-    choose_move(PossibleBoards, FinalBoard).
-
-choose_one_board(2, PossibleBoards, WinningBoards, FinalBoard):-
-    list_empty(WinningBoards),
-    choose_move(PossibleBoards, FinalBoard)
-    ;
-    choose_move(WinningBoards, FinalBoard).
 

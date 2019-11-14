@@ -1,58 +1,26 @@
-diagonal(1,1,2,2).
-diagonal(2,1,1,2).
-
-diagonal(1,3,2,4).
-diagonal(2,3,1,4).
-
-diagonal(3,1,4,2).
-diagonal(4,1,3,2).
-
-diagonal(3,3,4,4).
-diagonal(4,3,3,4).
-
-%%%%%% INPUT %%%%%%
-check_column('A', 1).
-check_column('B', 2).
-check_column('C', 3).
-check_column('D', 4).
-
-symb_of_player(cube_w, 1).
-symb_of_player(cil_w, 1).
-symb_of_player(cone_w, 1).
-symb_of_player(sph_w, 1).
-symb_of_player(cube_b, 2).
-symb_of_player(cil_b, 2).
-symb_of_player(cone_b, 2).
-symb_of_player(sph_b, 2).
-
-symb_solid(cube_w, cube).
-symb_solid(cil_w, cylinder).
-symb_solid(cone_w, cone).
-symb_solid(sph_w, sphere).
-symb_solid(cube_b, cube).
-symb_solid(cil_b, cylinder).
-symb_solid(cone_b, cone).
-symb_solid(sph_b, sphere).
-
-validate_column(ColumnNumb):-
+get_column(Column):-
     write('Column: '),
-    read(ColumnLetter),
+    read(Column).
+
+get_row(Row):-
+    write('Row: '),
+    read(Row).
+
+get_solid(Solid):-
+    write('Solid: '),
+    read(Solid).
+
+validate_column(ColumnLetter, ColumnNumb):-
     (\+ (var(ColumnLetter)), check_column(ColumnLetter, ColumnNumb)
     ;
     write('Invalid Column! Try again..\n\n'),
     fail).
 
 validate_row(Row):-
-    write('Row: '),
-    read(Row),
     (\+ (var(Row)), number(Row), Row >= 1, Row =< 4 
     ;
     write('Invalid Row! Try again..\n\n'),
     fail).
-
-get_solid(Solid):-
-    write('Solid: '),
-    read(Solid).
 
 validate_solid(Solid, Piece, Player):-
     (\+ (var(Solid)), cell_symbol(Piece, Solid), symb_of_player(Piece, Player)
@@ -61,16 +29,18 @@ validate_solid(Solid, Piece, Player):-
     fail
     ).
 
-validate_move(Row, Column, Piece, Player):-
-    once(validate_column(Column)),
+validate_move_input(Row, Column, Piece, Player):-
+    get_column(ColumnLetter),
+    once(validate_column(ColumnLetter, Column)),
+    get_row(Row),
     once(validate_row(Row)),
     get_solid(Solid),
     validate_solid(Solid, Piece, Player).
 
 %%%%%% MOVEMENT %%%%%%
 %%% Free Space %%%
-check_free_space(Row, Column, Current_board):-
-    check_free_space_line(Row, Column, Current_board).
+check_free_space(Row, Column, Board):-
+    check_free_space_line(Row, Column, Board).
 
 check_free_space_line(1, Column, [Row | _]):-
     check_free_space_column(Column, Row).
@@ -83,7 +53,6 @@ check_free_space_line(N, Column, [_ | Rest]):-
 check_free_space_column(1, [empty | _]):- !.
 
 check_free_space_column(1, [_ | _]):-
-   % TODO:write('\nThat cell already has a piece! Choose another one:\n'),
     fail.
 
 check_free_space_column(N, [_ | Rest]):-
@@ -124,15 +93,15 @@ same_piece(_, _, Counter, Counter):- !.
 
 
 %%% Valid Move %%%
-valid_move(Row, Column, Piece, Current_Board):-
-    once(valid_line_move(Row, 4, Piece, Current_Board)),
-    once(valid_column_move(4, Column, Piece, Current_Board)),
-    valid_diagonal_move(Row,Column,Piece,Current_Board).
+is_move_valid(Row, Column, Piece, Board):-
+    once(valid_line_move(Row, 4, Piece, Board)),
+    once(valid_column_move(4, Column, Piece, Board)),
+    valid_diagonal_move(Row,Column,Piece,Board).
 
 
 %% Valid Line Move %%
-valid_line_move(Row, Column, Piece, Current_Board):-
-    valid_line_move_to_line(Row, Column, Piece, Current_Board).
+valid_line_move(Row, Column, Piece, Board):-
+    valid_line_move_to_line(Row, Column, Piece, Board).
 
 valid_line_move_to_line(1, Column, Piece, [Row | _]):-
     valid_line_move_to_column(Column, Piece, Row).
@@ -160,12 +129,11 @@ valid_piece_move(Cell, Piece):-
     \+ (CellSolid == PieceSolid,
     CellPlayer \== PiecePlayer)
     ;
-    %TODO: write('\nYou\'re opponent has already put the same solid in that line, column or quadrant! Choose another cell:\n'),
     fail.
 
 %% Valid Column Move %%
- valid_column_move(Row, Column, Piece, Current_Board):-
-     valid_column_move_to_line(Row, Column, Piece, Current_Board).
+ valid_column_move(Row, Column, Piece, Board):-
+     valid_column_move_to_line(Row, Column, Piece, Board).
 
  valid_column_move_to_line(0, _, _, []).
 
@@ -184,13 +152,13 @@ valid_piece_move(Cell, Piece):-
      valid_column_move_to_column(Next, Piece, Rest).
 
 %% Valid Quadrant Move %%
-valid_diagonal_move(Row, Column, Piece, Current_board):-
+valid_diagonal_move(Row, Column, Piece, Board):-
     (
         diagonal(Row,Column,DRow,DColumn)
         ;
         diagonal(DRow,DColumn,Row,Column)
     ),
-    valid_diagonal_move_to_line(DRow, DColumn, Piece, Current_board).
+    valid_diagonal_move_to_line(DRow, DColumn, Piece, Board).
 
 valid_diagonal_move_to_line(1, Column, Piece, [Row | _]):-
     valid_diagonal_move_to_column(Column, Piece, Row).
