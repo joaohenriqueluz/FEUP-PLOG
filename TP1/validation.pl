@@ -1,27 +1,58 @@
+/**
+ * get_column(-Column: integer)
+ * 
+ * Reads move column.
+ */
 get_column(Column):-
     write('Column: '),
     read(Column).
 
+/**
+ * get_row(-Row: integer)
+ * 
+ * Reads move row.
+ */
 get_row(Row):-
     write('Row: '),
     read(Row).
 
+/**
+ * get_solid(-Solid)
+ * 
+ * Reads move solid.
+ */
 get_solid(Solid):-
     write('Solid: '),
     read(Solid).
 
+/**
+ * validate_column(+ColumnLetter, -ColumnNumb)
+ * 
+ * Succeeds if the column letter corresponds to a board column number.
+ */
 validate_column(ColumnLetter, ColumnNumb):-
     (\+ (var(ColumnLetter)), check_column(ColumnLetter, ColumnNumb)
     ;
     write('Invalid Column! Try again..\n\n'),
     fail).
 
+/**
+ * validate_row(+Row)
+ * 
+ * Succeeds if the row corresponds to a board row.
+ */
 validate_row(Row):-
     (\+ (var(Row)), number(Row), Row >= 1, Row =< 4 
     ;
     write('Invalid Row! Try again..\n\n'),
     fail).
 
+/**
+ * validate_solid(+Solid, -Piece, +Player)
+ * 
+ * Succeeds if the solid read corresponds to a valid piece and 
+ * it belongs to the current player.
+ */
 validate_solid(Solid, Piece, Player):-
     (\+ (var(Solid)), cell_symbol(Piece, Solid), symb_of_player(Piece, Player)
     ;
@@ -29,6 +60,11 @@ validate_solid(Solid, Piece, Player):-
     fail
     ).
 
+/**
+ * validate_move_input(-Row, -Column, -Piece, +Player)
+ * 
+ * Reads and validates move chosen by the player.
+ */
 validate_move_input(Row, Column, Piece, Player):-
     get_column(ColumnLetter),
     once(validate_column(ColumnLetter, Column)),
@@ -38,7 +74,11 @@ validate_move_input(Row, Column, Piece, Player):-
     validate_solid(Solid, Piece, Player).
 
 %%%%%% MOVEMENT %%%%%%
-%%% Free Space %%%
+/**
+ * check_free_space(+Row, +Column, +Board)
+ * 
+ * Succeeds if the board has a free space in the given row and column.
+ */
 check_free_space(Row, Column, Board):-
     check_free_space_line(Row, Column, Board).
 
@@ -60,7 +100,11 @@ check_free_space_column(N, [_ | Rest]):-
     Next is N - 1,
     check_free_space_column(Next, Rest).
 
-%%% Pieces Number %%%
+/**
+ * check_pieces_number(+Piece, +Board)
+ * 
+ * Succeeds if the board has less than 2 pieces equal to the given piece.
+ */
 check_pieces_number(Piece, Board):-
     pieces_number(4, 4, Piece, Board).
 
@@ -77,29 +121,40 @@ pieces_number_in_line(N, Column, Piece, [Row | Rest], Counter, NewCounter):-
 
 pieces_number_in_column(_, _, [], 2, _):- !, fail.
 
-pieces_number_in_column(0, _, [], NewCounter, NewnewCounter):-  
-    NewnewCounter is NewCounter, !.
+pieces_number_in_column(0, _, [], Counter, NewCounter):-  
+    NewCounter is Counter, !.
 
-pieces_number_in_column(N, Piece, [X | Rest], Counter, NewnewCounter):-
-    once(same_piece(X, Piece, Counter, NewCounter)),
+pieces_number_in_column(N, Piece, [X | Rest], Counter, NewCounter):-
+    once(same_piece(X, Piece, Counter, NewCounter2)),
     N > 0,
     Next is N - 1,
-    pieces_number_in_column(Next, Piece, Rest, NewCounter, NewnewCounter).
+    pieces_number_in_column(Next, Piece, Rest, NewCounter2, NewCounter).
 
+/**
+ * same_piece(+Piece1, +Piece2, +Counter, -NewCounter)
+ * 
+ * Increments the counter by one if Piece1 and Piece2 are the same.
+ */
 same_piece(X, X, Counter, NewCounter):-
     NewCounter is Counter + 1.
 
 same_piece(_, _, Counter, Counter):- !.
 
-
-%%% Valid Move %%%
+/**
+ * is_move_valid(+Row, +Column, +Piece, +Board)
+ * 
+ * Succeeds if the move is valid.
+ */
 is_move_valid(Row, Column, Piece, Board):-
     once(valid_line_move(Row, 4, Piece, Board)),
     once(valid_column_move(4, Column, Piece, Board)),
     valid_diagonal_move(Row,Column,Piece,Board).
 
-
-%% Valid Line Move %%
+/**
+ * valid_line_move(+Row, +Column, +Piece, +Board)
+ * 
+ * Succeeds if the move is valid in the line chosen.
+ */
 valid_line_move(Row, Column, Piece, Board):-
     valid_line_move_to_line(Row, Column, Piece, Board).
 
@@ -119,19 +174,11 @@ valid_line_move_to_column(N, Piece, [X | Rest]):-
     Next is N - 1,
     valid_line_move_to_column(Next, Piece, Rest).
 
-valid_piece_move(empty, _):-!.
-
-valid_piece_move(Cell, Piece):-
-    symb_solid(Cell, CellSolid),
-    symb_solid(Piece, PieceSolid),
-    symb_of_player(Cell, CellPlayer),
-    symb_of_player(Piece, PiecePlayer),
-    \+ (CellSolid == PieceSolid,
-    CellPlayer \== PiecePlayer)
-    ;
-    fail.
-
-%% Valid Column Move %%
+/**
+ * valid_column_move(+Row, +Column, +Piece, +Board)
+ * 
+ * Succeeds if the move is valid in the column chosen.
+ */
  valid_column_move(Row, Column, Piece, Board):-
      valid_column_move_to_line(Row, Column, Piece, Board).
 
@@ -151,7 +198,12 @@ valid_piece_move(Cell, Piece):-
      Next is N - 1,
      valid_column_move_to_column(Next, Piece, Rest).
 
-%% Valid Quadrant Move %%
+/**
+ * valid_diagonal_move(+Row, +Column, +Piece, +Board)
+ * 
+ * Succeeds if the move is valid in the quadrant chosen, 
+ * only needing to check the quadrant diagonal position.
+ */
 valid_diagonal_move(Row, Column, Piece, Board):-
     (
         diagonal(Row,Column,DRow,DColumn)
@@ -176,4 +228,20 @@ valid_diagonal_move_to_column(N, Piece, [_ | Rest]):-
     Next is N - 1,
     valid_diagonal_move_to_column(Next, Piece , Rest).
 
+/**
+ * valid_piece_move(+Cell, +Piece)
+ * 
+ * Succeeds if the Cell is empty or if the Cell does not have an adversary player piece 
+ * with the same shape(solid) as the Piece
+ */
+valid_piece_move(empty, _):-!.
+valid_piece_move(Cell, Piece):-
+    symb_solid(Cell, CellSolid),
+    symb_solid(Piece, PieceSolid),
+    symb_of_player(Cell, CellPlayer),
+    symb_of_player(Piece, PiecePlayer),
+    \+ (CellSolid == PieceSolid,
+    CellPlayer \== PiecePlayer)
+    ;
+    fail.
 

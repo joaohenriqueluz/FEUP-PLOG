@@ -1,3 +1,4 @@
+/** Initial Board **/
 initial_board([
     [empty, empty, empty, empty],
     [empty, empty, empty, empty],
@@ -5,6 +6,7 @@ initial_board([
     [empty, empty, empty, empty]
 ]).
 
+/** Example of Intermediate Board **/
 mid_board([
     [empty, cube_w, empty,  cil_b],
     [cil_w, sph_b,  empty,  empty],
@@ -12,6 +14,7 @@ mid_board([
     [empty, empty,  cil_w_2,  empty]
 ]).
 
+/** Example of Final Board **/
 final_board([
     [empty, cube_w, empty,  cil_b],
     [cil_w, sph_b,  empty,  empty],
@@ -19,6 +22,12 @@ final_board([
     [empty, empty,  cil_w_2,  cube_w_2]
 ]).
 
+/**
+ * cell_symbol(+Cell, -CellDisplay)
+ * cell_symbol(-Cell, +CellDisplay)
+ * 
+ * Succeeds if the cell has a display form.
+ */
 cell_symbol(empty,'    ').
 cell_symbol(cube_w, wCub).
 cell_symbol(cil_w, wCyl).
@@ -30,30 +39,51 @@ cell_symbol(cone_b, bCon).
 cell_symbol(sph_b, bSph).
 cell_symbol(_, _):- fail.
 
+/**
+ * write_symbol(+Cell)
+ * 
+ * Writes the board cell in its display form
+ */
 write_symbol(Cell):-
     cell_symbol(Cell, Symb),
     write(Symb).
 
+/**
+ * player(+PlayerDisplay, -Player)
+ * 
+ * Succeeds if the player has a display form.
+ */
 player('1 - White Pieces', 1).
 player('2 - Black Pieces', 2).
 
+/**
+ * display_row(+Row)
+ * 
+ * Displays row received.
+ */
 display_row([]):- !.
-
 display_row([Cell | RestRow]):-
     write_symbol(Cell),
     write(' | '),
     display_row(RestRow).
 
-display_rows([],_):- !.
-
-display_rows([Row | OtherRows],RowNumber):-
-    format('\t|  ~d  | ',RowNumber),
+/**
+ * display_rows(+Rows: list, RowNumber: integer)
+ * 
+ * Displays rows received and its number.
+ */
+display_rows([], _):- !.
+display_rows([Row | OtherRows], RowNumber):-
+    format('\t|  ~d  | ', RowNumber),
     NewRowNumber is RowNumber + 1,
     display_row(Row), 
     format(' ~d  |',RowNumber), nl,
     write('\t ----- ------ ------ ------ ------ ------ \n'),
     display_rows(OtherRows, NewRowNumber).
     
+/**
+ * Displays the meanings used to display the game board.
+ */
 display_meanings:-
     write('Meanings:\n'),
     write('wCyl -> White cylinder\t\t'),
@@ -68,6 +98,11 @@ display_meanings:-
     write('wSph -> White sphere\t\t'),
     write('bSph -> Black sphere\n\n').
 
+/**
+ * display_board(+Board)
+ * 
+ * Displays game board.
+ */
 display_board(Board):-
     write('\n\n\n\t       ---------------------------\n'),
     write('\t       ---------- Board ----------\n'),
@@ -75,11 +110,16 @@ display_board(Board):-
     write('\t       ------ ------ ------ ------\n'),
     write('\t      |  A.  |  B.  |  C.  |  D.  |\n'),
     write('\t ----- ------ ------ ------ ------ -----\n'),
-    display_rows(Board,1),
+    display_rows(Board, 1),
     write('\t      |  A.  |  B.  |  C.  |  D.  |\n'),
     write('\t       ------ ------ ------ ------\n'),
     display_meanings.
 
+/**
+ * display_game(+Board, +Player)
+ * 
+ * Displays game board and the next player to play.
+ */
 display_game(Board, Player):-
    % write('\33\[2J'),
     display_board(Board),
@@ -88,6 +128,11 @@ display_game(Board, Player):-
     write(PlayerDisplay),
     nl, nl, nl.
 
+/**
+ * display_game_over(+Board, +Player)
+ * 
+ * Displays game board and the winner.
+ */
 display_game_over(Board, Player):-
     %write('\33\[2J'),
     display_board(Board),
@@ -96,11 +141,19 @@ display_game_over(Board, Player):-
     write(PlayerDisplay),
     write(' **\n\n').
 
+/**
+ * display_game_over(+Board)
+ * 
+ * Displays game board and the tie message.
+ */
 display_tie(Board):-
     write('\33\[2J'),
     display_board(Board),
     write('\n ** No more valid moves available **\n\n').
 
+/**
+ * Displays main menu.
+ */
 display_menu:-
     write('\t       ---------------------------\n'),
     write('\t      |          QUANTIK          |\n'),
@@ -110,6 +163,9 @@ display_menu:-
     write('\t      |        4:Exit Game        |\n'),
     write('\t       ---------------------------\n').
 
+/**
+ * Displays level menu.
+ */
 display_level:-
     write('\t       ---------------------------\n'),
     write('\t      |          QUANTIK          |\n'),
@@ -117,6 +173,9 @@ display_level:-
     write('\t      |         2:Medium          |\n'),
     write('\t       ---------------------------\n').
 
+/**
+ * Displays message when an invalid move occurs.
+ */
 display_move_error:-
     write('\n\t ---------------------------------------\n'),
     write('\t|         Something went wrong!         |\n'),
