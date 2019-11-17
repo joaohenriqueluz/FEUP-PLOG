@@ -10,16 +10,16 @@ initial_board([
 mid_board([
     [empty, cube_w, empty,  cil_b],
     [cil_w, sph_b,  empty,  empty],
-    [empty, cone_b, cone_b_2, sph_w],
-    [empty, empty,  cil_w_2,  empty]
+    [empty, cone_b, cone_b, sph_w],
+    [empty, empty,  cil_w,  empty]
 ]).
 
 /** Example of Final Board **/
 final_board([
     [empty, cube_w, empty,  cil_b],
     [cil_w, sph_b,  empty,  empty],
-    [empty, cone_b, cone_b_2, sph_w],
-    [empty, empty,  cil_w_2,  cube_w_2]
+    [empty, cone_b, cone_b, sph_w],
+    [empty, empty,  cil_w,  cube_w]
 ]).
 
 /**
@@ -136,10 +136,15 @@ display_game(Board, Player):-
 display_game_over(Board, Player):-
     %write('\33\[2J'),
     display_board(Board),
-    write('\n ** Winner: Player '),
+    write('\n   ____                         ___\n'),               
+    write('  / ___| __ _ _ __ ___   ___   / _ \\__   _____ _ __ \n'),
+    write(' | |  _ / _` | \'_ ` _ \\ / _ \\ | | | \\ \\ / / _ \\ \'__|\n'),
+    write(' | |_| | (_| | | | | | |  __/ | |_| |\\ V /  __/ |\n'),   
+    write('  \\____|\\__,_|_| |_| |_|\\___|  \\___/  \\_/ \\___|_|\n'),
+    write('\n\n\t ** Winner: Player '),
     player(PlayerDisplay, Player),
     write(PlayerDisplay),
-    write(' **\n\n').
+    write('**\n\n').  
 
 /**
  * display_game_over(+Board)

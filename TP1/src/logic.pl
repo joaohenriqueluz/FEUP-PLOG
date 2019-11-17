@@ -202,6 +202,19 @@ solid_isnt_in_list(Piece, [X | Y]):-
     ;
     solid_isnt_in_list(Piece, Y).
 
+
+
+human_move(Board,Player,NewBoard):-
+    % Ask and validate move
+    validate_move_input(Row, Column, Piece, Player),
+
+    % Move Piece 
+    (move([Row, Column, Piece], Board, NewBoard)
+    ;
+    display_move_error,
+    fail).
+
+
 /**
  * game_loop(+Player, +Board, +PlayerType, +NextPlayerType, +Level) 
  * 
@@ -213,18 +226,11 @@ solid_isnt_in_list(Piece, [X | Y]):-
 game_loop(Player, Board, h, NextPlayerType, Level):-
     repeat,
 
-    % Ask and validate move
-    once(validate_move_input(Row, Column, Piece, Player)),
-
-    % Move Piece 
-    (once(move([Row, Column, Piece], Board, NewBoard))
-    ;
-    display_move_error,
-    fail),
+    % Move Human Piece
+    once(human_move(Board,Player,NewBoard)),
 
     % Check Game Over
-    (game_over(NewBoard, Player),
-    display_game_over(NewBoard, Player)
+    (game_over(NewBoard, Player)
     ;
     next_player(Player, NewPlayer),
         % Checks for next turn valid moves
@@ -234,7 +240,7 @@ game_loop(Player, Board, h, NextPlayerType, Level):-
         list_empty(AllBoards),
         display_tie(NewBoard)   
         ;
-
+        
         % Next player turn
         display_game(NewBoard, NewPlayer),
         game_loop(NewPlayer, NewBoard,  NextPlayerType, h, Level)
@@ -244,7 +250,7 @@ game_loop(Player, Board, h, NextPlayerType, Level):-
 game_loop(Player, Board, c, NextPlayerType, Level):-
     repeat,
 
-    % Move Piece 
+    % Move Computer Piece 
     once(computer_move(Board, Player, Level, FinalBoard)),
    
     % Check Game Over
