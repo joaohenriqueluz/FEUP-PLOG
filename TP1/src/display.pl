@@ -153,8 +153,14 @@ display_game_over(Board, Player):-
  */
 display_tie(Board):-
     write('\33\[2J'),
-    display_board(Board),
-    write('\n ** No more valid moves available **\n\n').
+    display_board(Board),    
+    write('\t  _____ _\n'),      
+    write('\t |_   _(_) ___ \n'),
+    write('\t   | | | |/ _ \\\n'),
+    write('\t   | | | |  __/\n'),
+    write('\t   |_| |_|\\___|\n'),        
+ 
+    write('\n\n ** No more valid moves available **\n\n').
 
 /**
  * Displays main menu.
