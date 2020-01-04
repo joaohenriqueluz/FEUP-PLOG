@@ -1,13 +1,11 @@
-:-use_module(library(lists)).
-
-cell_symbol(0):- write(' ').
-cell_symbol(1):-
+cell_symbol(empty):- write(' ').
+cell_symbol(square):-
     %%write('\x2b1b\').
     put_code(11035).
-cell_symbol(2):-
+cell_symbol(triangle):-
     %%write( '\x25B2\').
     put_code(9650).
-cell_symbol(3):-
+cell_symbol(circle):-
     %%write('\x25CF\')
     put_code(9679).
 cell_symbol(_):- fail.
@@ -58,13 +56,21 @@ display_board([Head|Tail], Index, N, Line):-
     New is Index -1,
     display_board(Tail, New, N, Line).
 
-display(Board, N):-
-    append(Board, BoardFlat),
-    write('\n\n  '),
-    display_column_number(1,N),
+
+example_board(5, [empty,empty,empty,triangle, square,
+empty,empty,empty,square,empty,
+circle,circle,circle,empty,circle,
+empty,triangle,triangle,empty,circle,
+empty,empty,square,empty,empty]).
+
+symmetry:-
+    set_prolog_flag(double_quotes, codes),
+    example_board(5,Board),
+    write('  '),
+    display_column_number(1,5),
     write('   '),
-    display_line(1,N),
-    display_board(BoardFlat, N, N, 1),nl.
+    display_line(1,5),
+    display_board(Board, 5, 5, 1).
 
 
     

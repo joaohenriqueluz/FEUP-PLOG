@@ -10,7 +10,8 @@ symmetry(N, FinalBoard):-
     solve_symmetry(Board, N),
     create_puzzle(Board, N, FinalBoard),
     write('\nA new puzzle is: '),
-    display_every(FinalBoard, N), !.
+    write(FinalBoard),
+    display(FinalBoard, N), !.
 
 % Removes random pieces from chosen board
 create_puzzle(Board, N, FinalBoard):-
@@ -18,9 +19,6 @@ create_puzzle(Board, N, FinalBoard):-
     Min is round(N2/4.0),
     Max is round(N2/1.5), 
     random(Min, Max, NumPieces),
-    write('Max = '), write(Max), nl,
-    write('Min = '), write(Min), nl,
-    write('NumPieces = '), write(NumPieces), nl,
     removePieces(NumPieces, N, Board, FinalBoard).
 
 % Removes NumPieces pieces from board
@@ -60,13 +58,12 @@ selRandom(Var, _, BB0, BB1):-
 symmetry(Board):-
     set_prolog_flag(double_quotes, codes),
     length(Board, N),
-    write('Initial puzzle: '),
-    display_every(Board, N),
+    %write('\nInitial puzzle: '),
+    %display(Board, N),
     maplist(replace_zeros, Board, VarBoard),
     (solve_symmetry(VarBoard, N),
     write('\nSolution is: '),
-    write(VarBoard),
-    display_every(VarBoard,N);
+    display(VarBoard,N), !;
     write('\nNo solution found!\n'), !).
 
 % Replaces zeros with decision variables
