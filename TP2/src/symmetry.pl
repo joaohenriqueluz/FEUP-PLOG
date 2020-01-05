@@ -58,8 +58,6 @@ selRandom(Var, _, BB0, BB1):-
 symmetry(Board):-
     set_prolog_flag(double_quotes, codes),
     length(Board, N),
-    %write('\nInitial puzzle: '),
-    %display(Board, N),
     maplist(replace_zeros, Board, VarBoard),
     (solve_symmetry(VarBoard, N),
     write('\nSolution is: '),
@@ -72,22 +70,30 @@ replace_zeros([0|Tail], [_|Rest]) :- replace_zeros(Tail, Rest).
 replace_zeros([H|Tail], [H|Rest]):- replace_zeros(Tail, Rest).
 
 solve_symmetry(Lines, N):-
+    reset_timer,
     N2 is N * N,
     N4 is N2 + 2*N,
     N8 is N2 + 4*N,
     length(Columns, N), 
     maplist(same_length(Columns), Columns),
-    length(LinesFlat, N2), 
+    length(LinesUni, N2), 
     length(AlmostFinal, N4),
     length(Final, N8), 
 
     line_constraints(N, Lines, N, [], CountersL),
     transpose(Lines, Columns),
     line_constraints(N, Columns, N, [], CountersC),
-    append(Lines, LinesFlat),
-    append(LinesFlat, CountersL, AlmostFinal),
+    append(Lines, LinesUni),
+    append(LinesUni, CountersL, AlmostFinal),
     append(AlmostFinal, CountersC, Final),
-    labeling([value(selRandom)], Final).
+    labeling([value(selRandom)], Final),
+    %labeling([], Final),
+    %labeling([middle, max_regret], Final),
+    %labeling([value(selRandom), occurrance], Final),
+    %labeling([median, ff], Final),
+    %labeling([bisect,min], Final),
+    print_time,
+	fd_statistics.
 
 % Checks if List is a palindrome
 check_palindrome(List, Counter1, Counter2):-
@@ -96,7 +102,7 @@ check_palindrome(List, Counter1, Counter2):-
     palind_automaton(ReversedList, Counter2),
     Counter1 #= Counter2.
 
-% Automaton to remove zeros form List
+% Automaton to remove zeros from List
 palind_automaton(List, Counter):-
     palind_signature(List, Sign),
     automaton(Sign, _, Sign,
@@ -127,3 +133,9 @@ line_constraints(Index, Board, N, Counters, FinalCounters):-
     NewIndex is Index-1,
     line_constraints(NewIndex, Board, N, NNC, FinalCounters).
 
+%% Statistics %%
+reset_timer :- statistics(walltime,_).	
+print_time :-
+	statistics(walltime,[_,T]),
+	TS is ((T//10)*10)/1000,
+	nl, write('Time: '), write(TS), write('s'), nl, nl.
